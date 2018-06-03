@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>websocket测试</title>
+  <script src="./js/axios.min.js"></script>
+  <script src="./js/vue.min.js"></script>
+
+
+</head>
+
+<body>
+  <template id="temp">
+    <div class="">
+      <div v-for="(x,v) in rows"> {{x.content}} </div>
+      <div class="">
+        <textarea name="name" rows="8" cols="80" v-model="content" @keyup.enter="send"></textarea>
+      </div>
+      <button type="button" name="button" @click="send">send</button>
+
+    </div>
+
+
+  </template>
+  <div id="dialog">
+    <serv>
+
+    </serv>
+
+  </div>
+
+</body>
+<script type="text/javascript" src="./js/utils.js">
+</script>
+<script type="text/javascript">
+  var name = utils.qs("name")
+  var room = utils.qs("room")
+
+  console.log(room)
+  if (name) {
+    var ws = new WebSocket(`ws://localhost:8765/hhh?name=${name}&room=${room}`);
+    //  console.log(document.getElementById("temp").innerHTML);
+    Vue.component('serv', {
+      template: '#temp',
+
+      data: function () {
+        return {
+          content: '请输入',
+          rows: [{
+            content: "a",
+            createAt: "2018-05-05",
+            edit: false
+          }]
+        }
+      },
+      mounted: function () {
+        let that = this
+        ws.onmessage = function (evt) {
+          console.log(evt.data)
+
+          let data = JSON.parse(evt.data)
+          that.rows.push({
+            content: data.name + ":" + data.message
+          });
+
+        };
+      },
+      methods: {
+        send: function () {
+          if (this.content === "") {
+            alert("请输入")
+            return
+          }
+          // this.rows.push({
+          //   content: name + ":" + this.content
+          // });
+
+          ws.send(this.content)
+
+          this.content = ""
+        }
+
+      }
+    })
+
+    new Vue({
+      el: '#dialog'
+    })
+
+
+    ws.onopen = function (evt) {
+      console.log('Connection open ...');
+    };
+
+
+    ws.onclose = function (evt) {
+      console.log('Connection closed.');
+    };
+    //console.log(ws);
+
+  }
+</script>
+
+</html>

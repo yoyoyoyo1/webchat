@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script type="text/javascript" src="./js/utils.js"></script>
+    <script src="./js/axios.min.js"></script>
+    <script src="./js/vue.min.js"></script>
+    <title>Document</title>
+</head>
+
+
+<body>
+    <div id="app">
+        title:
+        <input type="text" v-model="title"> content:
+        <input type="text" v-model="content">
+        <div>
+            可选择用户:
+            <ul>
+                <li v-for="(user,index) in select" @click="selectUser(index)">{{user.name}}</li>
+            </ul>
+        </div>
+        <div>
+            已选择用户:
+            <ul>
+                <li v-for="(user,index) in selected" @click="cancel(index)"> {{user.name}}</li>
+            </ul>
+        </div>
+        <button @click="submit()">提交</button>
+    </div>
+    <script>
+        var name = utils.qs("name")
+        new Vue({
+            el: '#app',
+            data: {
+                title: "",
+                content: "",
+                select: [],
+                selected: [],
+                dialogs: []
+            },
+            created() {
+
+                axios.get('/user/?name=' + name).then(r => {
+
+                    for (let i = 0; i < r.data.length; i++) {
+                        this.select.push(r.data[i])
+                    }
+                })
+            },
+            methods: {
+                selectUser(index) {
+                    this.selected.push({
+                        name: this.select[index].name
+                    })
+                    delete this.select.splice(index, 1)
+                },
+                cancel(index) {
+                    this.select.push({
+                        name: this.selected[index].name
+                    })
+                    delete this.selected.splice(index, 1)
+                },
+                submit() {
+                    axios.post("/postDialog/", {
+                        users: this.selected,
+                        title: this.title,
+                        content: this.content,
+                        owner:name
+                    }).then(r => {
+                        console.log(r.data)
+                    })
+                }
+
+            }
+        })
+    </script>
+</body>
+
+</html>
