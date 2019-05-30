@@ -26,7 +26,7 @@ module.exports = async (req, tables, CONNS, ws) => {
 
     CONNS[ws.room.title][ws.user.name] = ws
 
-    //这里是进入
+    //这里是进入后获取 未读消息
     let messages = await ws.room.getMessages({ raw: true, attributes: [ ['userName', 'name'],'message'] })
 
     for(let i = 0;i<messages.length;i++){
